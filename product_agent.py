@@ -6,9 +6,10 @@ Responds in the customer's detected language.
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import AIMessage, SystemMessage, HumanMessage
 
-from state import DukanState
+from app.state import DukanState
 from catalog_rag import make_catalog_retriever_tool
-from config import GOOGLE_API_KEY,GEMINI_CHAT_MODEL,LLM_TEMPERATURE_CHAT
+from app.config import GOOGLE_API_KEY,GEMINI_CHAT_MODEL,LLM_TEMPERATURE_CHAT
+from utils.message_utils import extract_text_content
 
 _llm = ChatGoogleGenerativeAI(
     model = GEMINI_CHAT_MODEL,
@@ -52,7 +53,7 @@ def product_agent_node(state: DukanState)->dict:
     last_human_msg = ""
     for msg in reversed(state["messages"]):
         if msg.type == "human":
-            last_human_msg = msg.content
+            last_human_msg = extract_text_content(msg.content)
             break
 
     # RAG retrieval
@@ -76,8 +77,8 @@ def product_agent_node(state: DukanState)->dict:
             HumanMessage(content=_USER_PROMPT.format(question=last_human_msg))
         ]
 
-        response = _llm.invoke(messages)
-        reply = response.content.strip()
+        response = _llm.invoke(message)
+        reply = extract_text_content(response.content).strip()
 
     except Exception as exc:
         print(f"[product_agent] LLM error: {exc}")

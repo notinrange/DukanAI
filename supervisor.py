@@ -8,8 +8,9 @@ and detects language: en | hi | hinglish
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import HumanMessage
 
-from state import DukanState
-from config import GOOGLE_API_KEY, GEMINI_CHAT_MODEL, LLM_TEMPERATURE_CLASSIFY
+from app.state import DukanState
+from app.config import GOOGLE_API_KEY, GEMINI_CHAT_MODEL, LLM_TEMPERATURE_CLASSIFY
+from utils.message_utils import extract_text_content
 
 # llm
 _llm = ChatGoogleGenerativeAI(
@@ -72,10 +73,9 @@ def _detect_language_heuristric(text:str) ->str:
     # if any hindi character occurs
     hindi_script_chars = sum(1 for c in text if "\u0900" <= c <="\u097F")
 
-
     if hindi_script_chars > 1:
         return "hi"
-    words = set(text.lower().split)
+    words = set(text.lower().split())
     hindi_hit = len(words & _HINDI_KEYWORDS)
     if hindi_hit >= 2:
         return "hinglish"
@@ -86,7 +86,7 @@ def _detect_language_heuristric(text:str) ->str:
 
 
 def _classify_intent_heuristic(text:str)->tuple[str,float]:
-    words = set(text.lower().split)
+    words = set(text.lower().split())
     if words & _BOOKING_KEYWORDS:
         return "booking",0.5
     if words & _ORDER_KEYWORDS:
@@ -109,7 +109,7 @@ def supervisor_node(state: DukanState)->dict:
     last_human_msg = ""
     for msg in reversed(state["messages"]):
         if msg.type == "human":
-            last_human_msg = msg.content
+            last_human_msg = extract_text_content(msg.content)
             break
 
     if not last_human_msg:
@@ -131,7 +131,7 @@ def supervisor_node(state: DukanState)->dict:
             [HumanMessage(content=SUPERVISOR_PROMPT.format(message=last_human_msg))]
         )
 
-        raw = response.content.strip()
+        raw = extract_text_content(response.content).strip()
 
         for line in raw.splitlines():
             line = line.strip()

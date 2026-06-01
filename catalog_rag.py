@@ -18,11 +18,11 @@ import psycopg2.extras
 from langchain_core.tools import tool
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 
-from config import (
+from app.config import (
     DATABASE_URL,
     GOOGLE_API_KEY,
     GEMINI_EMBED_MODEL,
-    EMBEDDING_DIMENSIONS,
+    EMBEDDING_DIMENSION,
     RAG_TOP_K,
     S3_BUCKET,
 )
@@ -107,7 +107,7 @@ def embed_catalog_items(business_id:str, items:List[dict])->int:
         conn.close()
 
 
-def retrieve_catalog(business:str, query:str, top_k:int = RAG_TOP_K)->List[dict]:
+def retrieve_catalog(business_id:str, query:str, top_k:int = RAG_TOP_K)->List[dict]:
     """
     Semantic search over catelog_items using cosine distance (<==>).
     Returns up to 'top_k' matching products, ordered by similarity.
@@ -192,7 +192,7 @@ def embed_catalog_from_s3(business_id: str, s3_key:str)->int:
     import os
 
     s3 = boto3.client("s3", region_name=os.getenv("AWS_REGION", "ap-south-1"))
-    obj = s3.get_object(bucket=S3_BUCKET, key=s3_key)
+    obj = s3.get_object(Bucket=S3_BUCKET, Key=s3_key)
     raw_bytes = obj["Body"].read()
     
     # parse based on file extension
@@ -212,7 +212,7 @@ def embed_catalog_from_s3(business_id: str, s3_key:str)->int:
     for _,row in df.iterrows():
         item: dict = {
             "name" : str(row.get("name") or ""),
-            "description" : str(row.get("description" or row.get("desc") or "")),
+            "description" : str(row.get("description") or row.get("desc") or ""),
             "price": row.get("price") or row.get("mrp") or 0,
             "metadata" : {}
         }
@@ -239,7 +239,7 @@ def embed_catalog_from_local_csv(business_id:str, filepath:str) -> int:
     for _, row in df.iterrows():
         item = {
             "name" : str(row.get("name") or ""),
-            "description" : str(row.get("description" or "")),
+            "description" : str(row.get("description") or ""),
             "price" : row.get("price") or 0,
             "metadata":{
                 col : str(row.get(col,""))

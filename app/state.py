@@ -1,10 +1,10 @@
 from typing import Annotated, List, Optional
 from typing_extensions import TypedDict
 from langchain_core.messages import BaseMessage
-from langchain.graph.message import add_messages
+from langgraph.graph.message import add_messages
 
 
-class DukanState(TypeDict):
+class DukanState(TypedDict):
     messages: Annotated[List[BaseMessage], add_messages]
     customer_id: str
     business_id: str
