@@ -31,3 +31,10 @@ def extract_text_content(content: Any) -> str:
         return "\n".join(parts).strip()
 
     return ""
+
+def _extract_last_ai_message(state: dict) -> str:
+    """Return the content of the last AIMessage in state, or empty string."""
+    for msg in reversed(state.get("messages", [])):
+        if hasattr(msg, "type") and msg.type == "ai":
+            return msg.content
+    return ""

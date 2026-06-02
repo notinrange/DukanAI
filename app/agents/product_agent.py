@@ -7,7 +7,7 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import AIMessage, SystemMessage, HumanMessage
 
 from app.state import DukanState
-from catalog_rag import make_catalog_retriever_tool
+from app.rag.catalog_rag import make_catalog_retriever_tool
 from app.config import GOOGLE_API_KEY,GEMINI_CHAT_MODEL,LLM_TEMPERATURE_CHAT
 from utils.message_utils import extract_text_content
 

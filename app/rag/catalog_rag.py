@@ -30,8 +30,7 @@ from app.config import (
 # Embedding
 
 _embeddings = GoogleGenerativeAIEmbeddings(
-    model = GEMINI_EMBED_MODEL,
-    google_api_key = GOOGLE_API_KEY
+    model = GEMINI_EMBED_MODEL
 )
 
 # DB Helpers
