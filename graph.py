@@ -111,3 +111,16 @@ def build_graph():
     return compiled
 
 
+# Singleton
+dukan_graph = build_graph()
+
+def make_config(business_id: str, customer_id:str)->dict:
+    """
+    Build the LangGraph config dict for a specific conversation.
+    thread_id ensures each customer↔business pair has isolated history.
+    """
+    return {
+        "configurable":{
+            "thread_id" : f"{business_id}:{customer_id}"
+        }
+    }
