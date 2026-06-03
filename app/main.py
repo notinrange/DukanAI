@@ -19,7 +19,6 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 from langchain_core.messages import HumanMessage, AIMessage
-from state import DukanState
 from utils.message_utils import _extract_last_ai_message
 from app.graph import dukan_graph, make_config
 
@@ -82,6 +81,11 @@ async def global_error_handler(request: Request, exc: Exception):
 # Health
 
 @app.get("/health")
+async def health():
+    """Called by dukan-api and docker healthcheck."""
+    return {"status":"ok", "service":"dunkan-brain"}
+
+@app.post("agent/process", response_model=ProcessResponse)
 async def agent_process(req: ProcessRequest):
     """
     Main entry point.
