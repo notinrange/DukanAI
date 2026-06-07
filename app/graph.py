@@ -44,18 +44,22 @@ def _build_checkpointer():
     try:
         from langgraph.checkpoint.redis import RedisSaver
         
-        print(f"[graph] Using Redis checkpointer (alt import): {REDIS_URL}")
 
         checkpointer = stack.enter_context(
             RedisSaver.from_conn_string(REDIS_URL)
         )
+        checkpointer.setup()
+
+        print(f"[graph] Using Redis checkpointer: {REDIS_URL}")
+
         return checkpointer
-    except (ImportError, Exception):
-        pass
+    except Exception as e:
+        print(f"[graph] Redis checkpointer failed ({e.__class__.__name__}: {str(e)[:80]})")
+        print("[graph] ⚠️  Falling back to in-memory checkpointer...")
 
     # Dev fallback
     from langgraph.checkpoint.memory import MemorySaver
-    print("[graph] ⚠️  Redis unavailable — using MemorySaver (in-process, non-persistent)")
+    print("[graph] ℹ️  Using MemorySaver (in-process, non-persistent)")
     return MemorySaver()
 
 

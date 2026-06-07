@@ -63,8 +63,14 @@ _PRODUCT_KEYWORDS = {"price", "kitna", "cost", "rate", "available", "stock",
                      "product", "item", "color", "size", "kya hai"}
 _ORDER_KEYWORDS = {"order", "delivery", "track", "return", "refund", "status",
                    "arrive", "kahan hai", "aaya nahi"}
-_LEAD_KEYWORDS = {"fees", "enroll", "join", "course", "coaching", "service",
-                  "demo", "how to", "kaise", "batao", "information"}
+_LEAD_KEYWORDS = {
+    "fees", "enroll", "join", "course", "coaching", "service",
+    "demo", "how to", "kaise", "batao", "information",
+    "know more", "more about", "tell me", "details",
+    "interested", "inquiry", "enquiry", "services",
+    "my name", "name is", "contact", "number is",    # ← add these
+    "wholesale", "bulk", "order", "price list",       # ← add these
+}
 _BOOKING_KEYWORDS = {"appointment", "book", "slot", "available", "saturday",
                      "sunday", "timing", "schedule", "booking", "milna hai"}
 

@@ -99,7 +99,7 @@ def lead_agent_node(state: DukanState)->dict:
     last_human_message = ""
     for msg in reversed(state["messages"]):
         if msg.type == "human":
-            last_human_msg = extract_text_content(msg.content)
+            last_human_message = extract_text_content(msg.content)
             break
 
     # Extract from last 6 messages
@@ -157,6 +157,6 @@ def lead_agent_node(state: DukanState)->dict:
     return {
         "messages" : [AIMessage(content=reply)],
         "lead_data" : lead_data,
-        "agent_name" : "lead_agent",
+        "agent_used" : "lead_agent",
     }
 

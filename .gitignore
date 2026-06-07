@@ -2,3 +2,5 @@ venv
 Documents
 files.zip
 .env
+.idea
+.vscode

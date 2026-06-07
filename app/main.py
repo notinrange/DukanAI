@@ -44,8 +44,8 @@ app = FastAPI(
 class ProcessRequest(BaseModel):
     message: str = Field(..., description="Raw customer WhatsApp message text.")
     customer_id: str = Field(...,description="Customer's Whatsapp phone.")
-    businees_id: str = Field(..., description="Merchant's business UUID.")
-    customer_name: Optional[str] = Field(None, description="Customer display name if known.") 
+    business_id: str = Field(..., description="Merchant's business UUID.")
+    customer_name: Optional[str] = Field(None, description="Customer display name if known.")
 
 class ProcessResponse(BaseModel):
     message:str
@@ -85,7 +85,7 @@ async def health():
     """Called by dukan-api and docker healthcheck."""
     return {"status":"ok", "service":"dunkan-brain"}
 
-@app.post("agent/process", response_model=ProcessResponse)
+@app.post("/agent/process", response_model=ProcessResponse)
 async def agent_process(req: ProcessRequest):
     """
     Main entry point.
@@ -102,12 +102,12 @@ async def agent_process(req: ProcessRequest):
     dukan-api sends a template message to the customer and notifies the merchant.
     """
     t0 = time.monotonic()
-    config = make_config(req.businees_id, req.customer_id)
+    config = make_config(req.business_id, req.customer_id)
 
     initial_input = {
         "messages" : [HumanMessage(content=req.message)],
         "customer_id": req.customer_id,
-        "business_id" : req.businees_id,
+        "business_id" : req.business_id,
         "intent" : "",
         "confidence" : 0.0,
         "catalog_ctx": None,
@@ -125,7 +125,7 @@ async def agent_process(req: ProcessRequest):
             dukan_graph.invoke, initial_input, config
         ) # type:ignore
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=f"Afent graph error: {exc}")
+        raise HTTPException(status_code=500, detail=f"Agent graph error: {exc}")
     
     # Extract last AI reply
     reply_text = _extract_last_ai_message(final_state)

@@ -3,15 +3,22 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-
-GOOGLE_API_KEY: str = os.getenv("GOOGLE_API_KEY", "")
-GEMINI_CHAT_MODEL: str = os.getenv("GEMINI_MODEL", "gemini-1.5-flash")
-GEMINI_EMBED_MODEL: str = os.getenv(
-    "GEMINI_EMBEDDING_MODEL" , "models/text-embedding-004"
+GOOGLE_API_KEY_ENV_VARS: tuple[str, ...] = (
+    "GOOGLE_API_KEY_1",
+    "GOOGLE_API_KEY_2",
+    "GOOGLE_API_KEY_3",
+)
+GOOGLE_API_KEY: str = next(
+    (key for name in GOOGLE_API_KEY_ENV_VARS if (key := os.getenv(name, "").strip())),
+    "",
+)
+GEMINI_CHAT_MODEL: str = os.getenv("GEMINI_MODEL", "models/gemini-2.5-flash")
+HF_EMBED_MODEL: str = os.getenv(
+    "HF_EMBEDDING_MODEL", "sentence-transformers/all-mpnet-base-v2" 
 )
 
 
-EMBEDDING_DIMENSION:int = 768
+EMBEDDING_DIMENSION: int = 768
 
 # Database Postgres + pgvector
 

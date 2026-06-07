@@ -16,12 +16,11 @@ import psycopg2
 import psycopg2.extras
 
 from langchain_core.tools import tool
-from langchain_google_genai import GoogleGenerativeAIEmbeddings
-
+from langchain_huggingface import HuggingFaceEmbeddings
 from app.config import (
     DATABASE_URL,
     GOOGLE_API_KEY,
-    GEMINI_EMBED_MODEL,
+    HF_EMBED_MODEL,
     EMBEDDING_DIMENSION,
     RAG_TOP_K,
     S3_BUCKET,
@@ -29,8 +28,8 @@ from app.config import (
 
 # Embedding
 
-_embeddings = GoogleGenerativeAIEmbeddings(
-    model = GEMINI_EMBED_MODEL
+_embeddings = HuggingFaceEmbeddings(
+    model = HF_EMBED_MODEL
 )
 
 # DB Helpers
@@ -45,7 +44,7 @@ def _vec_to_pg(vector: List[float])->str:
 # Core functions
 
 def embed_text(text:str)->List[float]:
-    """Embed a single with Gemini text-embedding-004 (768 dims.)"""
+    """Embed a single HF Embedding Model (768 dims.)"""
     return _embeddings.embed_query(text)
 
 def embed_catalog_items(business_id:str, items:List[dict])->int:
