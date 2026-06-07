@@ -3,19 +3,13 @@
 Responds in the customer's detected language.
 """
 
-from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import AIMessage, SystemMessage, HumanMessage
 
 from app.state import DukanState
 from app.rag.catalog_rag import make_catalog_retriever_tool
-from app.config import GOOGLE_API_KEY,GEMINI_CHAT_MODEL,LLM_TEMPERATURE_CHAT
+from app.config import GEMINI_CHAT_MODEL, LLM_TEMPERATURE_CHAT
+from app.llm import invoke_gemini_with_fallback
 from utils.message_utils import extract_text_content
-
-_llm = ChatGoogleGenerativeAI(
-    model = GEMINI_CHAT_MODEL,
-    google_api_key=GOOGLE_API_KEY,
-    temperature = LLM_TEMPERATURE_CHAT,
-)
 
 _SYSTEM_PROMPT = """\
     You are a helpful product assistant for an Indian small business.
@@ -77,7 +71,12 @@ def product_agent_node(state: DukanState)->dict:
             HumanMessage(content=_USER_PROMPT.format(question=last_human_msg))
         ]
 
-        response = _llm.invoke(message)
+        response = invoke_gemini_with_fallback(
+            message,
+            model=GEMINI_CHAT_MODEL,
+            temperature=LLM_TEMPERATURE_CHAT,
+            caller="product_agent",
+        )
         reply = extract_text_content(response.content).strip()
 
     except Exception as exc:

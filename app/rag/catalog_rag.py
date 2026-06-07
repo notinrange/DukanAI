@@ -19,7 +19,6 @@ from langchain_core.tools import tool
 from langchain_huggingface import HuggingFaceEmbeddings
 from app.config import (
     DATABASE_URL,
-    GOOGLE_API_KEY,
     HF_EMBED_MODEL,
     EMBEDDING_DIMENSION,
     RAG_TOP_K,

@@ -4,20 +4,12 @@ product | order | lead | booking | human
 and detects language: en | hi | hinglish
 """
 
-
-from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import HumanMessage
 
 from app.state import DukanState
-from app.config import GOOGLE_API_KEY, GEMINI_CHAT_MODEL, LLM_TEMPERATURE_CLASSIFY
+from app.config import GEMINI_CHAT_MODEL, LLM_TEMPERATURE_CLASSIFY
+from app.llm import invoke_gemini_with_fallback
 from utils.message_utils import extract_text_content
-
-# llm
-_llm = ChatGoogleGenerativeAI(
-    model = GEMINI_CHAT_MODEL,
-    google_api_key = GOOGLE_API_KEY,
-    temperature=LLM_TEMPERATURE_CLASSIFY,
-)
 
 # prompt
 
@@ -133,8 +125,11 @@ def supervisor_node(state: DukanState)->dict:
     confidence = 0.8
 
     try:
-        response = _llm.invoke(
-            [HumanMessage(content=SUPERVISOR_PROMPT.format(message=last_human_msg))]
+        response = invoke_gemini_with_fallback(
+            [HumanMessage(content=SUPERVISOR_PROMPT.format(message=last_human_msg))],
+            model=GEMINI_CHAT_MODEL,
+            temperature=LLM_TEMPERATURE_CLASSIFY,
+            caller="supervisor",
         )
 
         raw = extract_text_content(response.content).strip()

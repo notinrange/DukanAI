@@ -8,10 +8,21 @@ GOOGLE_API_KEY_ENV_VARS: tuple[str, ...] = (
     "GOOGLE_API_KEY_2",
     "GOOGLE_API_KEY_3",
 )
-GOOGLE_API_KEY: str = next(
-    (key for name in GOOGLE_API_KEY_ENV_VARS if (key := os.getenv(name, "").strip())),
-    "",
-)
+
+
+def _load_google_api_keys() -> tuple[str, ...]:
+    keys: list[str] = []
+    seen: set[str] = set()
+    for name in GOOGLE_API_KEY_ENV_VARS:
+        key = os.getenv(name, "").strip()
+        if key and key not in seen:
+            keys.append(key)
+            seen.add(key)
+    return tuple(keys)
+
+
+GOOGLE_API_KEYS: tuple[str, ...] = _load_google_api_keys()
+GOOGLE_API_KEY: str = GOOGLE_API_KEYS[0] if GOOGLE_API_KEYS else ""
 GEMINI_CHAT_MODEL: str = os.getenv("GEMINI_MODEL", "models/gemini-2.5-flash")
 HF_EMBED_MODEL: str = os.getenv(
     "HF_EMBEDDING_MODEL", "sentence-transformers/all-mpnet-base-v2" 

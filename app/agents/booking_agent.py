@@ -5,18 +5,13 @@ Saves confirmed booking to PostgreSQL booking table
 """
 
 import json
-from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import AIMessage, HumanMessage
 
 from app.state import DukanState
-from app.config import GOOGLE_API_KEY, GEMINI_CHAT_MODEL, LLM_TEMPERATURE_CHAT, DATABASE_URL
+from app.config import GEMINI_CHAT_MODEL, LLM_TEMPERATURE_CHAT, DATABASE_URL
+from app.llm import invoke_gemini_with_fallback
 
 from utils.message_utils import extract_text_content
-_llm = ChatGoogleGenerativeAI(
-    model = GEMINI_CHAT_MODEL,
-    google_api_key = GOOGLE_API_KEY,
-    temperature=LLM_TEMPERATURE_CHAT,
-)
 
 # Prompts
 
@@ -115,9 +110,9 @@ def booking_agent_node(state:DukanState)->dict:
     )
 
     try:
-        extraction = _llm.invoke([
+        extraction = invoke_gemini_with_fallback([
             HumanMessage(content = _EXTRACT_PROMPT.format(conversation=conversation_text))
-        ])
+        ], model=GEMINI_CHAT_MODEL, temperature=LLM_TEMPERATURE_CHAT, caller="booking_agent")
         raw = extract_text_content(extraction.content).strip()
         if raw.startswith("```"):
             raw = raw.split("```")[1]
@@ -142,14 +137,14 @@ def booking_agent_node(state:DukanState)->dict:
     
     # Generate response
     try:
-        response = _llm.invoke([
+        response = invoke_gemini_with_fallback([
             HumanMessage(content=_RESPOND_PROMPT.format(
                 booking_data = json.dumps(booking_data, ensure_ascii = False, indent = 2),
                 missing=", ".join(missing) if missing else "none - booking confirmed",
                 message = last_human_msg,
                 language = language,
             ))
-        ])
+        ], model=GEMINI_CHAT_MODEL, temperature=LLM_TEMPERATURE_CHAT, caller="booking_agent")
 
         reply = extract_text_content(response.content).strip()
     except Exception as exc:
